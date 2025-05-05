@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mundo do Alex</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin: 0;
+            padding: 20px;
+            color: #ff0000;
+            text-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        .gif-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px;
+            max-width: 90%;
+        }
+        
+        .gif-container img {
+            width: 250px;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .gif-container img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.8);
+        }
+        
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+            }
+            to {
+                text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 60px #ff0000;
+            }
+        }
+        
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                rgba(0, 0, 0, 0.1) 50%,
+                rgba(0, 0, 0, 0.3) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* Novo CSS para a caixa de mensagens e comentários */
+        .message-box {
+            margin-top: 30px;
+            width: 80%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        #message-input {
+            width: 100%;
+            padding: 10px;
+            background-color: #111;
+            color: #fff;
+            border: 1px solid #ff0000;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        #submit-btn {
+            padding: 10px 20px;
+            background-color: #ff0000;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: background-color 0.3s;
+        }
+        
+        #submit-btn:hover {
+            background-color: #cc0000;
+        }
+        
+        .comments-section {
+            display: none;
+            width: 80%;
+            max-width: 600px;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: rgba(17, 17, 17, 0.8);
+            border: 1px solid #ff0000;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .comment {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .comment:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+    
+    <div class="header">
+        <h1>Bem vindo ao mundo do alex</h1>
+    </div>
+    
+    <div class="gif-container">
+        <!-- GIF 1 - Unabomber manifesto -->
+        <img src="https://media0.giphy.com/media/ZM8GICJOTgpMc/giphy.gif?cid=6c09b9524vdyo4ebklpcwposnsx9a0yhipaxkvr4v8n9vzid&ep=v1_internal_gif_by_id&rid=giphy.gif&ct=g" alt="Unabomber manifesto">
+        
+        <!-- GIF 2 - Unabomber sketch -->
+        <img id="middle-gif" src="https://media4.giphy.com/media/xUA7b4arnbo3THfzi0/giphy.gif?cid=6c09b952ik09z3mdjiq6y16zkw22vate99veyl752z4jkz0i&ep=v1_internal_gif_by_id&rid=giphy.gif&ct=g" alt="Unabomber sketch">
+        
+        <!-- GIF 3 - Unabomber news -->
+        <img src="https://media0.giphy.com/media/a6cpK5GitYVrYJssYA/giphy.gif?cid=6c09b952pvtglj2ydpjt11qq39d7ulm1fvv6n41m38gzamdr&ep=v1_internal_gif_by_id&rid=giphy.gif&ct=g" alt="Unabomber news">
+    </div>
+
+    <!-- Caixa de mensagens -->
+    <div class="message-box">
+        <input type="text" id="message-input" placeholder="Digite sua mensagem...">
+        <button id="submit-btn">Enviar</button>
+    </div>
+    
+    <!-- Seção de comentários (inicialmente oculta) -->
+    <div class="comments-section" id="comments-section">
+        <h3>Comentários Secretos</h3>
+        <div id="comments-list"></div>
+    </div>
+
+    <script>
+        // Efeito de digitação no título
+        document.addEventListener('DOMContentLoaded', function() {
+            const title = document.querySelector('h1');
+            const text = title.textContent;
+            title.textContent = '';
+            
+            let i = 0;
+            const typing = setInterval(() => {
+                if (i < text.length) {
+                    title.textContent += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(typing);
+                }
+            }, 100);
+            
+            // Efeito de movimento aleatório nos GIFs
+            const gifs = document.querySelectorAll('.gif-container img');
+            setInterval(() => {
+                gifs.forEach(gif => {
+                    if (Math.random() > 0.7) {
+                        gif.style.transform = `rotate(${Math.random() * 6 - 3}deg)`;
+                    }
+                });
+            }, 3000);
+            
+            // Lógica para a caixa de mensagens e comentários
+            const messageInput = document.getElementById('message-input');
+            const submitBtn = document.getElementById('submit-btn');
+            const commentsList = document.getElementById('comments-list');
+            const commentsSection = document.getElementById('comments-section');
+            const middleGif = document.getElementById('middle-gif');
+            
+            let comments = JSON.parse(localStorage.getItem('alex-comments')) || [];
+            let clickCount = 0;
+            let lastClickTime = 0;
+            
+            // Atualiza a lista de comentários
+            function updateComments() {
+                commentsList.innerHTML = '';
+                comments.forEach(comment => {
+                    const commentElement = document.createElement('div');
+                    commentElement.className = 'comment';
+                    commentElement.textContent = comment;
+                    commentsList.appendChild(commentElement);
+                });
+            }
+            
+            // Mostrar/ocultar comentários ao clicar 3 vezes no GIF do meio
+            middleGif.addEventListener('click', function() {
+                const now = new Date().getTime();
+                
+                if (now - lastClickTime > 1000) { // Resetar contagem se passou mais de 1 segundo
+                    clickCount = 0;
+                }
+                
+                clickCount++;
+                lastClickTime = now;
+                
+                if (clickCount >= 3) {
+                    commentsSection.style.display = commentsSection.style.display === 'block' ? 'none' : 'block';
+                    clickCount = 0;
+                }
+            });
+            
+            // Adicionar novo comentário
+            submitBtn.addEventListener('click', function() {
+                const message = messageInput.value.trim();
+                if (message) {
+                    comments.push(message);
+                    localStorage.setItem('alex-comments', JSON.stringify(comments));
+                    messageInput.value = '';
+                    updateComments();
+                }
+            });
+            
+            // Permitir enviar com Enter
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    submitBtn.click();
+                }
+            });
+            
+            // Carregar comentários existentes
+            updateComments();
+        });
+    </script>
+</body>
+</html>
